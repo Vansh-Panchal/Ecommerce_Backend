@@ -1,17 +1,26 @@
 package com.example.demo.config;
 
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+
 @Component
-public class JwtConstant {
-
-    public static String SECRET_KEY;
-
-    public static final String JWT_HEADER = "Authorization";
+public class JwtValidator {
 
     @Value("${jwt.secret}")
-    public void setSecretKey(String secretKey) {
-        JwtConstant.SECRET_KEY = secretKey;
+    private String jwtSecret;
+
+    private SecretKey key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
+
+    public SecretKey getKey() {
+        return key;
     }
 }
