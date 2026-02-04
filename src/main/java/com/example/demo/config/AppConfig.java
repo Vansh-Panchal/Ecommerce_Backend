@@ -3,7 +3,7 @@ package com.example.demo.config;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jspecify.annotations.Nullable;
+import org.springframework.lang.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
