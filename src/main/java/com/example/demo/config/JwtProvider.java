@@ -1,8 +1,10 @@
 package com.example.demo.config;
 
 import java.util.Date;
+
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -14,10 +16,12 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtProvider {
 
-    private final SecretKey key =
-            Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
+    private final SecretKey key;
 
-    // ✅ CREATE JWT
+    public JwtProvider(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
     public String generateToken(Authentication authentication) {
 
         String authority = authentication.getAuthorities()
@@ -26,48 +30,40 @@ public class JwtProvider {
                 .map(GrantedAuthority::getAuthority)
                 .orElse("USER");
 
-        // 🔴 REMOVE "ROLE_" IF PRESENT
         String role = authority.startsWith("ROLE_")
                 ? authority.substring(5)
                 : authority;
 
         return Jwts.builder()
-                .setSubject(authentication.getName())   // email
-                .claim("role", role)                    // ADMIN / USER
+                .setSubject(authentication.getName())
+                .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
                 .compact();
     }
 
-
-    // ✅ EXTRACT EMAIL SAFELY
     public String getEmailFromToken(String token) {
 
-        if (token == null || !token.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid Authorization header");
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
         }
-
-        token = token.substring(7);
 
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token)   // ✅ CORRECT
+                .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getSubject(); // email
+        return claims.getSubject();
     }
 
-    // ✅ OPTIONAL: ROLE EXTRACTION (USEFUL LATER)
     public String getRoleFromToken(String token) {
-        if (token == null || token.isBlank()) {
-            throw new RuntimeException("Invalid JWT token");
-        }
-        // Accept either raw JWT or "Bearer <jwt>"
+
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
+
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

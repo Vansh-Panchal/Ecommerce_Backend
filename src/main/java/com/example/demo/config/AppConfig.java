@@ -3,17 +3,14 @@ package com.example.demo.config;
 import java.util.Arrays;
 import java.util.Collections;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -29,38 +26,23 @@ public class AppConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtValidator jwtValidator
-    ) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-        	
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-
-                // PUBLIC
                 .requestMatchers("/auth/**").permitAll()
 
-                // ADMIN ONLY
-                .requestMatchers(HttpMethod.POST, "/api/products/**")
-                    .hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
 
-                .requestMatchers(HttpMethod.PUT, "/api/products/**")
-                    .hasAuthority("ADMIN")
-
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**")
-                    .hasAuthority("ADMIN")
-
-                // USER + ADMIN
-                .requestMatchers(HttpMethod.GET, "/api/products/**")
-                    .permitAll()
-                    .requestMatchers("/api/payment/**", "/api/payments/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers("/api/payment/**", "/api/payments/**").authenticated()
 
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtValidator,
-                    UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtValidator, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -74,7 +56,7 @@ public class AppConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
             @Override
-            public @Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
                 CorsConfiguration cfg = new CorsConfiguration();
 

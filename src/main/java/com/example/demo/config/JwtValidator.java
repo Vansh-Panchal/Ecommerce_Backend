@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import java.io.IOException;
 import java.util.List;
+
 import javax.crypto.SecretKey;
 
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,8 +25,11 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtValidator extends OncePerRequestFilter {
 
-    private final SecretKey key =
-            Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
+    private final SecretKey key;
+
+    public JwtValidator(@Value("${jwt.secret}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     @Override
     protected void doFilterInternal(
@@ -33,7 +38,7 @@ public class JwtValidator extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(JwtConstant.JWT_HEADER);
 
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -49,8 +54,9 @@ public class JwtValidator extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String email = claims.getSubject();                 // from JwtProvider
-            String role = claims.get("role", String.class);     // "ADMIN" or "USER"
+            String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+
             if (role == null || role.isBlank()) {
                 role = "USER";
             }
