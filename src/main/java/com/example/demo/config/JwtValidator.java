@@ -30,10 +30,10 @@ public class JwtValidator extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain)
-            throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(JwtConstant.JWT_HEADER);
 
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -49,31 +49,31 @@ public class JwtValidator extends OncePerRequestFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String email = claims.getSubject();                 // from JwtProvider
-            String role = claims.get("role", String.class);     // "ADMIN" or "USER"
+            String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+
             if (role == null || role.isBlank()) {
                 role = "USER";
             }
 
-            UsernamePasswordAuthenticationToken authentication =
+            UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
                             email,
                             null,
                             List.of(new SimpleGrantedAuthority(role))
                     );
 
-            authentication.setDetails(
+            auth.setDetails(
                     new WebAuthenticationDetailsSource()
                             .buildDetails(request)
             );
 
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter()
-                    .write("{\"error\":\"Invalid or expired JWT token\"}");
+                    .write("{\"error\":\"Invalid or expired JWT\"}");
             return;
         }
 

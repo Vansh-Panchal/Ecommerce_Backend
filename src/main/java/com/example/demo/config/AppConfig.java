@@ -3,20 +3,19 @@ package com.example.demo.config;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.springframework.lang.Nullable;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
 public class AppConfig {
@@ -28,13 +27,9 @@ public class AppConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtValidator jwtValidator
-    ) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-        	
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
 
@@ -42,24 +37,20 @@ public class AppConfig {
                 .requestMatchers("/auth/**").permitAll()
 
                 // ADMIN ONLY
-                .requestMatchers(HttpMethod.POST, "/api/products/**")
-                    .hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ADMIN")
 
-                .requestMatchers(HttpMethod.PUT, "/api/products/**")
-                    .hasAuthority("ADMIN")
+                // PUBLIC GET
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
 
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**")
-                    .hasAuthority("ADMIN")
-
-                // USER + ADMIN
-                .requestMatchers(HttpMethod.GET, "/api/products/**")
-                    .permitAll()
-                    .requestMatchers("/api/payment/**", "/api/payments/**").authenticated()
+                // AUTH REQUIRED
+                .requestMatchers("/api/payment/**", "/api/payments/**").authenticated()
 
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtValidator,
-                    UsernamePasswordAuthenticationFilter.class);
+            // ✅ THIS IS NOW CORRECT
+            .addFilterBefore(jwtValidator, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -71,26 +62,22 @@ public class AppConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public @Nullable CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+        return request -> {
+            CorsConfiguration cfg = new CorsConfiguration();
 
-                CorsConfiguration cfg = new CorsConfiguration();
+            cfg.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:3000",
+                    "http://localhost:4200",
+                    "http://localhost:5173",
+                    "https://shopyverse.vercel.app"
+            ));
+            cfg.setAllowedMethods(Collections.singletonList("*"));
+            cfg.setAllowedHeaders(Collections.singletonList("*"));
+            cfg.setExposedHeaders(Arrays.asList("Authorization"));
+            cfg.setAllowCredentials(true);
+            cfg.setMaxAge(3600L);
 
-                cfg.setAllowedOrigins(Arrays.asList(
-                        "http://localhost:3000",
-                        "http://localhost:4200",
-                        "http://localhost:5173",
-                        "https://shopyverse.vercel.app"
-                ));
-                cfg.setAllowedMethods(Collections.singletonList("*"));
-                cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setExposedHeaders(Arrays.asList("Authorization"));
-                cfg.setAllowCredentials(true);
-                cfg.setMaxAge(3600L);
-
-                return cfg;
-            }
+            return cfg;
         };
     }
 }
