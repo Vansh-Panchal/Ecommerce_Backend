@@ -119,8 +119,16 @@ public class OrderServiceImplementation implements OrderService{
 	}
 
 	@Override
-	public List<Order> usersOrderHistory(Long userId) {
-		return orderRepository.findByUserId(userId);
+	public List<Order> usersOrderHistory(Long userId, String status) {
+	    // If no status is provided, return all orders for the user
+	    if (status == null || status.isEmpty() || status.equals("undefined")) {
+	        return orderRepository.findByUserId(userId);
+	    }
+	    
+	    // Otherwise, find orders matching BOTH the user and the specific status
+	    // Note: You might need to split the string if your frontend sends multiple 
+	    // comma-separated statuses (e.g., "delivered,cancelled")
+	    return orderRepository.findUserOrdersByStatus(userId, status);
 	}
 
 	@Override

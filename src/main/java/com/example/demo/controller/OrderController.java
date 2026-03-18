@@ -43,6 +43,17 @@ public class OrderController {
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
     
+    @GetMapping("/user")
+    public ResponseEntity<List<Order>> usersOrderHistory(
+            @RequestHeader("Authorization") String jwt,
+            @RequestParam(required = false) String status
+    ) throws OrderException, UserException {
+        User user = userService.findUserProfileByJwt(jwt);
+        List<Order> orders = orderService.usersOrderHistory(user.getId(), status);
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
+    
+    
     // ✅ Get order by id
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) throws OrderException {
@@ -51,12 +62,12 @@ public class OrderController {
     }
 
     // ✅ Get current user's order history
-    @GetMapping("/my")
-    public ResponseEntity<List<Order>> getMyOrders(@RequestHeader("Authorization") String authHeader) throws UserException {
-        User user = getUserFromAuthHeader(authHeader);
-        List<Order> orders = orderService.usersOrderHistory(user.getId());
-        return new ResponseEntity<>(orders, HttpStatus.OK);
-    }
+//    @GetMapping("/my")
+//    public ResponseEntity<List<Order>> getMyOrders(@RequestHeader("Authorization") String authHeader) throws UserException {
+//        User user = getUserFromAuthHeader(authHeader);
+//        List<Order> orders = orderService.usersOrderHistory(user.getId());
+//        return new ResponseEntity<>(orders, HttpStatus.OK);
+//    }
 
     // ✅ Admin: get all orders
     @GetMapping

@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -52,5 +53,28 @@ public class UserServieImplementation implements UserService{
 		
 		return user;
 	}
+	
+	@Override
+	public User saveUser(User user) {
+		return userRepository.save(user);
+	}
+	
+	 @Override
+	    public List<User> getAllUsers() {
+	        return userRepository.findAll();
+	    }
+	 
+	 @Override
+	 public void deleteUser(Long userId) {
 
+	     userRepository.deleteById(userId);
+
+	 }
+	 @Override
+	 public User getUserById(Long userId) {
+
+	     return userRepository.findById(userId)
+	             .orElseThrow(() -> new RuntimeException("User not found with id " + userId));
+	 }
+	 
 }

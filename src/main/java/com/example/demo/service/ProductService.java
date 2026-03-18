@@ -20,6 +20,10 @@ public interface ProductService {
 	
 	public List<Product> findProductByCategory(String Category);
 	
+	public List<Product> findByThirdLevelCategory(String ThirdLevelCategory);
+	
+	public List<Product> searchProducts(String keyword);
+	
 	public Page<Product> getAllProduct(String category,List<String> color, List<String> sizes, Integer minPrice, Integer maxPrice,
 			Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize);
 }

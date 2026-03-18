@@ -31,7 +31,7 @@ import com.example.demo.service.CustomeUserServiceImplementation;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -62,22 +62,13 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole("ROLE_USER");
+
         userRepository.save(user);
-        
-//        Cart cart = cartService.createCart(user);
 
-        Authentication auth =
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        null,
-                        List.of(new SimpleGrantedAuthority(user.getRole()))
-                );
-
-        String token = jwtProvider.generateToken(auth);
-        
-        return new ResponseEntity<>("Signup successful. Please login.", HttpStatus.CREATED);
+        return ResponseEntity.ok("User registered successfully. Please login.");
     }
-
+    
+    
     // SIGNIN = LOGIN (JWT CREATED HERE)
     @PostMapping("/signin")
     public ResponseEntity<AuthResponse> signin(@RequestBody LoginRequest request) {
@@ -91,18 +82,17 @@ public class AuthController {
 
         String token = jwtProvider.generateToken(authentication);
 
+        User user = userRepository.findByEmail(request.getEmail());
+
         AuthResponse response = new AuthResponse();
+
         response.setJwt(token);
+        response.setRole(user.getRole());
         response.setMessage("Login successful");
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-//        return new ResponseEntity<>(
-//                new AuthResponse(token, "Signup successful"),
-//                HttpStatus.CREATED
-//        );
-
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
+    
     private Authentication authenticate(String username, String password) {
 
         UserDetails userDetails =

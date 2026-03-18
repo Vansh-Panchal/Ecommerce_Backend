@@ -42,4 +42,18 @@ public class UserController {
         User user = userService.findUserById(userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+    
+    // Update Personal details
+    @PutMapping("/profile")
+    public ResponseEntity<User> updateUserProfile(
+    		@RequestHeader("Authorization") String authHeader,
+    		@RequestBody User updateUser)throws UserException{
+    	String jwt = authHeader.substring(7);
+    	User user = userService.findUserProfileByJwt(jwt);
+    	user.setFirstName(updateUser.getFirstName());
+    	user.setLastName(updateUser.getLastName());
+    	user.setMobile(updateUser.getMobile());
+    	User savedUser = userService.saveUser(user);
+    	return new ResponseEntity<>(savedUser,HttpStatus.OK);
+    }
 }

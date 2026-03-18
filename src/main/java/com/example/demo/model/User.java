@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -18,6 +20,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class User {
 
 	@Id
@@ -39,6 +43,8 @@ public class User {
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
 	private List<Address> address = new ArrayList<>();
 	
+	
+	
 	@Embedded
 	@ElementCollection
 	@CollectionTable(name="payment_information",joinColumns = @JoinColumn(name = "user_id"))
@@ -53,7 +59,7 @@ public class User {
 	private List<Review> reviews = new ArrayList<>();
 	
 	
-	private LocalDateTime createdAt;
+	private LocalDateTime createdAt = LocalDateTime.now();
 	
 	public User() {
 		// TODO Auto-generated constructor stub

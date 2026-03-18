@@ -3,55 +3,65 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.exception.ProductException;
 import com.example.demo.model.Product;
+import com.example.demo.repository.ProductRepository;
 import com.example.demo.request.createProductRequest;
 import com.example.demo.service.ProductService;
 
 @RestController
 @RequestMapping("/api/products")
+@CrossOrigin
+
 public class ProductController {
 
     private final ProductService productService;
+    
 
     public ProductController(ProductService productService) {
         this.productService = productService;
+        
     }
 
     // ✅ 1. GET ALL PRODUCTS (WITH FILTERS + PAGINATION)
-    @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) List<String> color,
-            @RequestParam(required = false) List<String> size,
-            @RequestParam(required = false, defaultValue = "0") Integer minPrice,
-            @RequestParam(required = false, defaultValue = "100000") Integer maxPrice,
-            @RequestParam(required = false, defaultValue = "0") Integer minDiscount,
-            @RequestParam(required = false, defaultValue = "price") String sort,
-            @RequestParam(required = false, defaultValue = "all") String stock,
-            @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
-            @RequestParam(required = false, defaultValue = "10") Integer pageSize
-    ) {
+  // ✅ Update the RequestParam names to match the frontend keys
+    
+@GetMapping
+public ResponseEntity<Page<Product>> getAllProducts(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false, name = "color") List<String> colors, // Changed from colors to color
+        @RequestParam(required = false, name = "size") List<String> sizes,   // Changed from sizes to size
+        @RequestParam(required = false, defaultValue = "0") Integer minPrice,
+        @RequestParam(required = false, defaultValue = "100000") Integer maxPrice,
+        @RequestParam(required = false, defaultValue = "0") Integer minDiscount,
+        @RequestParam(required = false, defaultValue = "price_low") String sort,
+        @RequestParam(required = false, defaultValue = "all") String stock,
+        @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
+        @RequestParam(required = false, defaultValue = "10") Integer pageSize
+) {
+    // Logic remains the same
+    Page<Product> products = productService.getAllProduct(
+            category, colors, sizes, minPrice, maxPrice, 
+            minDiscount, sort, stock, pageNumber, pageSize
+    );
+    return new ResponseEntity<>(products, HttpStatus.OK);
+}
 
-        Page<Product> products = productService.getAllProduct(
-                category,
-                color,
-                size,
-                minPrice,
-                maxPrice,
-                minDiscount,
-                sort,
-                stock,
-                pageNumber,
-                pageSize
-        );
 
-        return new ResponseEntity<>(products, HttpStatus.OK);
-    }
+//    @GetMapping("/{category}")
+//    public ResponseEntity<?> getProductsByCategoryAtHome(
+//            @RequestParam String thirdLevelCategory) {
+//
+//        List<Product> products =
+//            productService.findByThirdLevelCategory(thirdLevelCategory);
+//
+//        return ResponseEntity.ok(products);
+//    }
 
     // ✅ 2. GET PRODUCT BY ID
     @GetMapping("/{productId}")
