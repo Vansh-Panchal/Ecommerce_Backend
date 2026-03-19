@@ -105,14 +105,14 @@ public ResponseEntity<Page<Product>> getAllProducts(
     }
 
     // ✅ 6. SEARCH PRODUCTS
-//    @GetMapping("/search")
-//    public ResponseEntity<List<Product>> searchProducts(
-//            @RequestParam String q
-//    ) {
-//
-//        List<Product> products = productService.searchProduct(q);
-//        return new ResponseEntity<>(products, HttpStatus.OK);
-//    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(
+            @RequestParam String q
+    ) {
+
+        List<Product> products = productService.searchProducts(q);
+        return new ResponseEntity<>(products, HttpStatus.OK);
+    }
 
     // ✅ 7. GET PRODUCTS BY CATEGORY (SIMPLE)
     @GetMapping("/category/{category}")
