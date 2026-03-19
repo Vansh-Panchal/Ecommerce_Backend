@@ -38,7 +38,7 @@ The backend handles:
 - Secure payment processing via **Razorpay**
 - Role-based access for **Admin** and **Customer**
 
-> 🔗 Frontend Repository: [shopyverse-frontend](https://github.com/Vansh-Panchal/shopyverse-frontend)
+> 🔗 Frontend Repository: [shopyverse-frontend](https://github.com/Vansh-Panchal/Ecommerce_Frontend)
 
 ---
 
@@ -216,8 +216,7 @@ Make sure you have the following installed:
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/Vansh-Panchal/shopyverse-backend.git
-cd shopyverse-backend
+git clone https://github.com/Vansh-Panchal/Ecommerce_Backend/edit/recovered-backend.git
 ```
 
 2. **Create the MySQL database:**
@@ -264,8 +263,6 @@ razorpay.key.secret=YOUR_RAZORPAY_KEY_SECRET
 # CORS - Frontend URL
 frontend.url=http://localhost:5173
 ```
-
-> ⚠️ **Never commit your secrets to GitHub!** Add `application.properties` to `.gitignore` and use environment variables in production.
 
 ---
 
@@ -386,4 +383,4 @@ Built with ❤️ by **Vansh Panchal**
 
 ---
 
-> 🔗 **Frontend Repository:** [shopyverse-frontend](https://github.com/Vansh-Panchal/shopyverse-frontend)
+> 🔗 **Frontend Repository:** [shopyverse-frontend](https://github.com/Vansh-Panchal/Ecommerce_Frontend)
